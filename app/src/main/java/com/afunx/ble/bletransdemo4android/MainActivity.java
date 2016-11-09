@@ -1,9 +1,15 @@
 package com.afunx.ble.bletransdemo4android;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,6 +25,8 @@ import com.afunx.ble.device.BleDevice;
 import com.afunx.ble.utils.BleDeviceUtils;
 import com.afunx.ble.utils.BleUtils;
 
+import java.util.Arrays;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
@@ -30,14 +38,48 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothAdapter.LeScanCallback mLeScanCallback;
     private Handler mHandler;
 
+    private int REQUEST_CODE = 1;
+
+    private void requestBleAuthority() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                        REQUEST_CODE);
+            } else {
+                doRefresh();
+            }
+        } else {
+            doRefresh();
+        }
+    }
+
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode==REQUEST_CODE) {
+            boolean isForbidden = false;
+            for (int i = 0; i < grantResults.length; i++) {
+                if (grantResults[i] != 0) {
+                    isForbidden = true;
+                    break;
+                }
+            }
+            if (isForbidden) {
+                Toast.makeText(this, R.string.fail_get_bluetooth_authority, Toast.LENGTH_LONG).show();
+            } else {
+                doRefresh();
+            }
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mHandler = new Handler();
         // it is brutally sometimes
         BleUtils.openBleBrutally();
         init();
-        doRefresh();
+        mHandler = new Handler();
+        requestBleAuthority();
     }
 
     @Override
@@ -67,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
         mBleDeviceAdapter = new BleDeviceAdapter(this);
         mListView.setAdapter(mBleDeviceAdapter);
         // listview OnItemClickListener
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
@@ -85,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
         mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
             @Override
             public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-                if(BleDeviceUtils.isEspBluetoothDevice(device)) {
+                if (BleDeviceUtils.isEspBluetoothDevice(device)) {
                     BleDevice bleDevice = new BleDevice();
                     bleDevice.setBluetoothDevice(device);
                     bleDevice.setRssi(rssi);
