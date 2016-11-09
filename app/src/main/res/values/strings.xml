@@ -1,6 +1,6 @@
 <resources>
 
-    <string name="app_name">BLE WIFI DEMO V0.8.5</string>
+    <string name="app_name">BLE TRANS DEMO V0.8.0</string>
 
     <!-- operation steps -->
     <string name="operation_step_0">Please Select A Ble Device(drop down to refresh)</string>

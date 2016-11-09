@@ -1,6 +1,6 @@
 <resources>
 
-    <string name="app_name">BLE WIFI DEMO V0.8.5</string>
+    <string name="app_name">BLE TRANS DEMO V0.8.0</string>
 
     <!-- operation steps -->
     <string name="operation_step_0">请选择一个蓝牙设备(下拉可刷新)</string>
