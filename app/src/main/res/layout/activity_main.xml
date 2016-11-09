@@ -19,11 +19,6 @@
             android:gravity="start"
             android:text="@string/operation_step_0" />
 
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
     </LinearLayout>
 
     <ProgressBar

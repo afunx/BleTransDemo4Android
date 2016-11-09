@@ -1,8 +1,12 @@
 <resources>
+
     <string name="app_name">BLE WIFI DEMO V0.8.5</string>
 
     <!-- operation steps -->
     <string name="operation_step_0">Please Select A Ble Device(drop down to refresh)</string>
+
+    <!-- alert -->
+    <string name="fail_get_bluetooth_authority">Fail to get bluetooth related authorities</string>
 
     <!-- others -->
     <string name="device_name_unknown_device">Unkonwn Device</string>
