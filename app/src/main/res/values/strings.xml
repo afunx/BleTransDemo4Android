@@ -8,6 +8,10 @@
     <!-- alert -->
     <string name="fail_get_bluetooth_authority">Fail to get bluetooth related authorities</string>
 
+    <!-- strings -->
+    <string name="string_clear">Clear</string>
+    <string name="string_send">Send</string>
+
     <!-- others -->
     <string name="device_name_unknown_device">Unkonwn Device</string>
     <string name="device_address">Address</string>

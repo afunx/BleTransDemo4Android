@@ -25,8 +25,6 @@ import com.afunx.ble.device.BleDevice;
 import com.afunx.ble.utils.BleDeviceUtils;
 import com.afunx.ble.utils.BleUtils;
 
-import java.util.Arrays;
-
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
@@ -115,10 +113,10 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
                 Log.i(TAG, "item " + position + " is selected");
-//                Intent intent = new Intent(MainActivity.this, ConnectWifiActivity.class);
-//                BleDevice bleDevice = (BleDevice) mBleDeviceAdapter.getItem(position);
-//                intent.putExtra(BleKeys.BLE_ADDRESS, bleDevice.getBluetoothDevice().getAddress());
-//                startActivity(intent);
+                Intent intent = new Intent(MainActivity.this, TransActivity.class);
+                BleDevice bleDevice = (BleDevice) mBleDeviceAdapter.getItem(position);
+                intent.putExtra(BleKeys.BLE_ADDRESS, bleDevice.getBluetoothDevice().getAddress());
+                startActivity(intent);
             }
 
         });
