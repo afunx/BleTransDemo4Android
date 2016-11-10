@@ -39,7 +39,7 @@ public class BleConnector {
                     notifyLockConnect();
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
-                    connect(null, null, 0);
+                    connect(0);
                     break;
             }
         }
@@ -47,13 +47,12 @@ public class BleConnector {
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             Log.d(TAG, "onServicesDiscovered() status: " + status);
-            super.onServicesDiscovered(gatt, status);
+            notifyLockDiscoverService();
         }
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             Log.d(TAG, "onCharacteristicRead() characteristic: " + characteristic + ", status: " + status);
-            super.onCharacteristicRead(gatt, characteristic, status);
         }
 
         @Override
@@ -74,31 +73,26 @@ public class BleConnector {
         @Override
         public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
             Log.d(TAG, "onDescriptorRead() descriptor: " + descriptor + ", status: " + status);
-            super.onDescriptorRead(gatt, descriptor, status);
         }
 
         @Override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
             Log.d(TAG, "onDescriptorWrite() descriptor: " + descriptor + ", status: " + status);
-            super.onDescriptorWrite(gatt, descriptor, status);
         }
 
         @Override
         public void onReliableWriteCompleted(BluetoothGatt gatt, int status) {
             Log.d(TAG, "onReliableWriteCompleted() status: " + status);
-            super.onReliableWriteCompleted(gatt, status);
         }
 
         @Override
         public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
             Log.d(TAG, "onReadRemoteRssi() rssi: " + rssi + ", status: " + status);
-            super.onReadRemoteRssi(gatt, rssi, status);
         }
 
         @Override
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
             Log.d(TAG, "onMtuChanged() mtu: " + mtu + ", status: " + status);
-            super.onMtuChanged(gatt, mtu, status);
         }
     };
 
@@ -170,27 +164,6 @@ public class BleConnector {
         }
     }
 
-    // lock for enable notification
-    private final Object mLockEnableNotification = new Object();
-    private volatile boolean mIsEnableNotificationSuc = false;
-
-    private void notifyLockEnableNotification() {
-        mIsEnableNotificationSuc = true;
-        synchronized (mLockEnableNotification) {
-            mLockEnableNotification.notify();
-        }
-    }
-
-    private boolean waitLockEnableNotification(long millis) {
-        synchronized (mLockEnableNotification) {
-            try {
-                mLockEnableNotification.wait(millis);
-            } catch (InterruptedException ignore) {
-            }
-            return mIsEnableNotificationSuc;
-        }
-    }
-
     // lock for write
     private final Object mLockWrite = new Object();
     private volatile boolean mIsWriteSuc = false;
@@ -237,7 +210,7 @@ public class BleConnector {
      * @param timeout connect timeout in milliseconds, 0 or negative means forever and async
      * @return whether connect is suc(when timeout < 0, it always return false)
      */
-    public boolean connect(Runnable callbackSuc, Runnable callbackFail, long timeout) {
+    public boolean connect(long timeout) {
         mIsClosed = false;
         BluetoothAdapter adapter = getAdapter();
         if (adapter == null) {
@@ -306,9 +279,7 @@ public class BleConnector {
      */
     public boolean enableCharacteristicNotification(BluetoothGattCharacteristic gattCharacteristic, long timeout) {
         if (mBluetoothGatt != null) {
-            mBluetoothGatt.setCharacteristicNotification(gattCharacteristic, true);
-            waitLockEnableNotification(timeout);
-            return mIsEnableNotificationSuc;
+            return mBluetoothGatt.setCharacteristicNotification(gattCharacteristic, true);
         }
         return false;
     }
@@ -349,7 +320,7 @@ public class BleConnector {
      * Builder
      */
     public static class Builder {
-        public BleConnector build(String bleAddress, Context appContext) {
+        public static BleConnector build(String bleAddress, Context appContext) {
             return new BleConnector(bleAddress, appContext);
         }
     }
