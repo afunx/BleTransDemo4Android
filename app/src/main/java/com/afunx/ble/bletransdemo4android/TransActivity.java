@@ -30,10 +30,15 @@ public class TransActivity extends AppCompatActivity implements BleConnector.Rea
 
     private static final long GATT_CHAR_WRITE_TIMEOUT = 100;
 
-    public static final UUID UUID_TRANS_SERVICE = UUID
-            .fromString("0000ffff-0000-1000-8000-00805f9b34fb");
-    public static final UUID UUID_TRANS_CHARACTERISTIC = UUID
-            .fromString("0000ff01-0000-1000-8000-00805f9b34fb");
+    private static final UUID UUID_TRANS_SERVICE = UUID
+            .fromString("0000eeee-0000-1000-8000-00805f9b34fb");
+    // read/write characteristic
+    private static final UUID UUID_TRANS_CHARACTERISTIC_WRITE = UUID
+            .fromString("0000ee01-0000-1000-8000-00805f9b34fb");
+    // read/notify characteristic
+    private static final UUID UUID_TRANS_CHARACTERISTIC_READ = UUID
+            .fromString("0000ee02-0000-1000-8000-00805f9b34fb");
+
 
     private TextView mTvReceive;
     private EditText mEdtSend;
@@ -47,8 +52,7 @@ public class TransActivity extends AppCompatActivity implements BleConnector.Rea
     private String mBleAddress;
 
     private BleConnector mConnector;
-    private BluetoothGattService mGattService;
-    private BluetoothGattCharacteristic mGattCharacteristic;
+    private BluetoothGattCharacteristic mGattCharacteristicWrite;
 
     @Override
     public void onRead(byte[] bytesArrived) {
@@ -110,18 +114,18 @@ public class TransActivity extends AppCompatActivity implements BleConnector.Rea
                 Log.w(TAG,"InitTask discover service fail");
                 return RESULT_CODE_DISCOVER_SERVICE_FAIL;
             }
-            mGattService = gattService;
             updateMessage("discovering characteristic...");
             // discover characteristic
-            BluetoothGattCharacteristic gattCharacteristic = mConnector.discoverCharacteristic(gattService, UUID_TRANS_CHARACTERISTIC);
-            if (gattCharacteristic == null) {
+            BluetoothGattCharacteristic gattCharacteristicRead = mConnector.discoverCharacteristic(gattService, UUID_TRANS_CHARACTERISTIC_READ);
+            BluetoothGattCharacteristic gattCharacteristicWrite = mConnector.discoverCharacteristic(gattService, UUID_TRANS_CHARACTERISTIC_WRITE);
+            if (gattCharacteristicRead == null || gattCharacteristicWrite == null) {
                 Log.w(TAG,"InitTask discover characteristic fail");
                 return RESULT_CODE_DISCOVER_CHARACTERISTIC_FAIL;
             }
-            mGattCharacteristic = gattCharacteristic;
+            mGattCharacteristicWrite = gattCharacteristicWrite;
             updateMessage("enable notification");
             // enable notification
-            if (!mConnector.enableCharacteristicNotification(gattCharacteristic, GATT_ENABLE_NOTIFICATION_TIMEOUT)) {
+            if (!mConnector.enableCharacteristicNotification(gattCharacteristicRead, GATT_ENABLE_NOTIFICATION_TIMEOUT)) {
                 Log.w(TAG,"InitTask enable notification fail");
                 return RESULT_CODE_ENABLE_NOTIFICATION_FAIL;
             }
@@ -220,7 +224,7 @@ public class TransActivity extends AppCompatActivity implements BleConnector.Rea
     // send ble data according to mEdtSend
     private void sendBleData() {
         final Handler handler = mHandler;
-        final BluetoothGattCharacteristic gattCharacteristic = mGattCharacteristic;
+        final BluetoothGattCharacteristic gattCharacteristic = mGattCharacteristicWrite;
         final byte[] bytes = mEdtSend.getText().toString().getBytes();
         final Context context = this;
 

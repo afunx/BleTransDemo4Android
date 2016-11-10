@@ -6,7 +6,7 @@ import com.afunx.ble.device.BleDevice;
 
 public class BleDeviceUtils {
 
-	private static final String ESP_BLE_PREFIX = "Espressif_";
+	private static final String ESP_BLE_PREFIX = "ble_spp";
 
 	/**
 	 * check whether the ble device belong to Espressif
